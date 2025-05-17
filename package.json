@@ -11,6 +11,10 @@
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
+  "configurations": {
+    "images": "/Users/UserName/projects/png-to-jpg/sample_images",
+    "contents": "/Users/UserName/projects/png-to-jpg/sample_contents"
+  },
   "contributes": {
     "commands": [
       {
