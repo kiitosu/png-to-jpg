@@ -12,8 +12,8 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "configurations": {
-    "images": "/Users/UserName/projects/png-to-jpg/sample_images",
-    "contents": "/Users/UserName/projects/png-to-jpg/sample_contents"
+    "images": "sample_images",
+    "contents": "sample_contents"
   },
   "contributes": {
     "commands": [
@@ -21,7 +21,23 @@
         "command": "png-to-jpg.convert",
         "title": "Hello World"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "png to jpg Configuration",
+      "properties": {
+        "png-to-jpg.images": {
+          "type": "string",
+          "default": "sample_images",
+          "description": "Path to images folder"
+        },
+        "png-to-jpg.contents": {
+          "type": "string",
+          "default": "sample_contents",
+          "description": "Path to contents folder"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
