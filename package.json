@@ -9,12 +9,13 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+      "onCommand:png-to-jpg.convert"
+  ],
   "main": "./dist/extension.js",
-  "configurations": {
-    "images": "sample_images",
-    "contents": "sample_contents"
-  },
+  "configurations": {},
+  "png-to-jpg.images": "images",
+  "png-to-jpg.contents": "articles",
   "contributes": {
     "commands": [
       {
