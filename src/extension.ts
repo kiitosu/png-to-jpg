@@ -71,20 +71,28 @@ async function replacePngReferencesToJpg(dir: string) {
 export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "png-to-jpg" is now active!');
 
-  const packageJsonPath = path.join(context.extensionPath, "package.json");
-  const packageJson = JSON.parse(fsSync.readFileSync(packageJsonPath, "utf-8"));
-  const images = packageJson.configurations.images;
-  const contents = packageJson.configurations.contents;
+  const config = vscode.workspace.getConfiguration("png-to-jpg");
+  const images = config.get<string>("images") || "sample_images";
+  const contents = config.get<string>("contents") || "sample_contents";
 
   const disposable = vscode.commands.registerCommand(
     "png-to-jpg.convert",
     async () => {
+      try {
+        console.log("Command execution started");
         vscode.window.showInformationMessage(`Converting PNG to JPG in configured directory: ${images}`);
         await convertPngToJpg(images);
+        console.log("PNG to JPG conversion completed");
         // 参照変換も実行
         await replacePngReferencesToJpg(contents);
+        console.log("Reference replacement completed");
         vscode.window.showInformationMessage("Conversion completed!");
-        return;
+        console.log("Command execution finished successfully");
+      } catch (error) {
+        vscode.window.showErrorMessage(`Error during conversion: ${error instanceof Error ? error.message : String(error)}`);
+        console.error("Error during conversion:", error);
+      }
+      return;
     }
   );
 
