@@ -1,26 +1,67 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import * as fs from "fs/promises";
+import * as path from "path";
+import sharp from "sharp";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "png-to-jpg" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('png-to-jpg.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from png to jpg!');
-	});
-
-	context.subscriptions.push(disposable);
+/**
+ * 指定ディレクトリ以下のPNGファイルを再帰的にJPEGに変換する関数
+ * @param dir 変換対象のディレクトリパス
+ */
+async function convertPngToJpg(dir: string) {
+  /**
+   * ディレクトリを再帰的に処理し、PNGファイルをJPEGに変換する内部関数
+   * @param directory 処理対象のディレクトリパス
+   */
+  async function processDirectory(directory: string) {
+    const entries = await fs.readdir(directory, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        await processDirectory(fullPath);
+      } else if (
+        entry.isFile() &&
+        path.extname(entry.name).toLowerCase() === ".png"
+      ) {
+        const jpgPath = fullPath.slice(0, -4) + ".jpg";
+        try {
+          await sharp(fullPath).jpeg({ quality: 30 }).toFile(jpgPath);
+          console.log(`Converted: ${fullPath} -> ${jpgPath}`);
+        } catch (error) {
+          console.error(`Failed to convert ${fullPath}:`, error);
+        }
+      }
+    }
+  }
+  await processDirectory(dir);
 }
 
-// This method is called when your extension is deactivated
+export function activate(context: vscode.ExtensionContext) {
+  console.log('Congratulations, your extension "png-to-jpg" is now active!');
+
+  const disposable = vscode.commands.registerCommand(
+    "png-to-jpg.convert",
+    async () => {
+      const options: vscode.OpenDialogOptions = {
+        canSelectFolders: true,
+        canSelectFiles: false,
+        canSelectMany: false,
+        openLabel: "Select folder to convert PNG to JPG",
+      };
+      const folderUri = await vscode.window.showOpenDialog(options);
+      if (folderUri && folderUri[0]) {
+        const folderPath = folderUri[0].fsPath;
+        vscode.window.showInformationMessage(
+          `Converting PNG to JPG in: ${folderPath}`
+        );
+        await convertPngToJpg(folderPath);
+        vscode.window.showInformationMessage("Conversion completed!");
+      } else {
+        vscode.window.showInformationMessage("No folder selected.");
+      }
+    }
+  );
+
+  context.subscriptions.push(disposable);
+}
+
 export function deactivate() {}
