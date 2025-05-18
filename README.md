@@ -4,8 +4,7 @@ pngファイルをjpgファイルに変換し、参照している箇所も`xxx.
 
 ## Features
 
-コマンドパレットを開いてください。`Shift + Ctrl (Cmd) + P`
-`png-to-jpg.convert`で実行できます。
+`Shift + Ctrl (Cmd) + P` でコマンドパレットを開いて `png-to-jpg.convert` を実行してください。
 
 ## Requirements
 
@@ -13,8 +12,8 @@ pngファイルをjpgファイルに変換し、参照している箇所も`xxx.
 
 ## Extension Settings
 以下の設定が必要です。
-* "png-to-jpg.images" : "画像が置かれている相対パス"
-* "png-to-jpg.contents" : "zenn等のコンテンツが置かれている相対パス"
+* "png-to-jpg.images" : "画像が置かれているディレクトリ"
+* "png-to-jpg.contents" : "zenn等のコンテンツが置かれているディレクトリ"
 
 ## Known Issues
 
@@ -22,6 +21,6 @@ pngファイルをjpgファイルに変換し、参照している箇所も`xxx.
 
 ## Release Notes
 
-### 0.0.1
+### 0.0.3
 
 Initial release
