@@ -98,36 +98,51 @@ export function activate(context: vscode.ExtensionContext) {
     articles = articles.replace('${workspaceFolder}', workspaceFolder);
   }
 
-    const disposable = vscode.commands.registerCommand(
-      "png-to-jpg.convert",
-      async () => {
-        try {
-          console.log("Command execution started");
+  // 拡張機能インストール直後および更新時に再起動を促す通知を表示
+  const currentVersion = vscode.extensions.getExtension('kiitosu.png-to-jpg')?.packageJSON.version;
+  const previousVersion = context.globalState.get<string>('extensionVersion');
+  if (currentVersion !== previousVersion) {
+    vscode.window.showInformationMessage(
+      '拡張機能がインストールまたは更新されました。再起動してください。',
+      'Restart Extension'
+    ).then(selection => {
+      if (selection === 'Restart Extension') {
+        vscode.commands.executeCommand('workbench.action.reloadWindow');
+      }
+    });
+    context.globalState.update('extensionVersion', currentVersion);
+  }
 
-          // 画像変換
-          const convertPngToJpgMessage = `Converting PNG to JPG in ${images}`
-          console.log(convertPngToJpgMessage);
-          vscode.window.showInformationMessage(convertPngToJpgMessage);
-          const convertedPngFiles = await convertPngToJpg(images);
-          console.log("PNG to JPG conversion completed");
+  const disposable = vscode.commands.registerCommand(
+    "png-to-jpg.convert",
+    async () => {
+      try {
+        console.log("Command execution started");
 
-          // 参照変換
-          const convertReferenceMessage = `Converting reference in ${articles}`
-          console.log(convertReferenceMessage);
-          vscode.window.showInformationMessage(convertReferenceMessage);
-          await replacePngReferencesToJpg(articles, convertedPngFiles);
-          console.log("Reference replacement completed");
+        // 画像変換
+        const convertPngToJpgMessage = `Converting PNG to JPG in ${images}`
+        console.log(convertPngToJpgMessage);
+        vscode.window.showInformationMessage(convertPngToJpgMessage);
+        const convertedPngFiles = await convertPngToJpg(images);
+        console.log("PNG to JPG conversion completed");
 
-          console.log("Command execution finished successfully");
-          vscode.window.showInformationMessage("Conversion completed!");
+        // 参照変換
+        const convertReferenceMessage = `Converting reference in ${articles}`
+        console.log(convertReferenceMessage);
+        vscode.window.showInformationMessage(convertReferenceMessage);
+        await replacePngReferencesToJpg(articles, convertedPngFiles);
+        console.log("Reference replacement completed");
+
+        console.log("Command execution finished successfully");
+        vscode.window.showInformationMessage("Conversion completed!");
 
       } catch (error) {
-          vscode.window.showErrorMessage(`Error during conversion: ${error instanceof Error ? error.message : String(error)}`);
-          console.error("Error during conversion:", error);
-        }
-        return;
+        vscode.window.showErrorMessage(`Error during conversion: ${error instanceof Error ? error.message : String(error)}`);
+        console.error("Error during conversion:", error);
       }
-    );
+      return;
+    }
+  );
 
   context.subscriptions.push(disposable);
 }
