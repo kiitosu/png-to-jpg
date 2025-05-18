@@ -1,10 +1,11 @@
 {
   "name": "png-to-jpg",
+  "publisher": "kiitosu",
   "displayName": "png to jpg",
   "description": "Convert png file to jpg in specific place",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.100.0"
+    "vscode": "^1.100.2"
   },
   "categories": [
     "Other"
@@ -12,8 +13,8 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "configurations": {},
-  "png-to-jpg.images": "images",
-  "png-to-jpg.contents": "articles",
+  "png-to-jpg.images": "${workspaceFolder}/images/",
+  "png-to-jpg.articles": "${workspaceFolder}/articles/",
   "contributes": {
     "commands": [
       {
@@ -27,13 +28,13 @@
       "properties": {
         "png-to-jpg.images": {
           "type": "string",
-          "default": "sample_images",
+          "default": "${workspaceFolder}/images/",
           "description": "Path to images folder"
         },
-        "png-to-jpg.contents": {
+        "png-to-jpg.articles": {
           "type": "string",
-          "default": "sample_contents",
-          "description": "Path to contents folder"
+          "default": "${workspaceFolder}/articles/",
+          "description": "Path to articles folder"
         }
       }
     }
@@ -60,12 +61,16 @@
     "@typescript-eslint/parser": "^8.31.1",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.5.2",
-    "esbuild": "^0.25.3",
+    "esbuild": "^0.25.4",
     "eslint": "^9.25.1",
     "npm-run-all": "^4.1.5",
     "typescript": "^5.8.3"
   },
   "dependencies": {
     "sharp": "^0.34.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourname/your-repo.git"
   }
 }

@@ -72,23 +72,42 @@ export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "png-to-jpg" is now active!');
 
   const config = vscode.workspace.getConfiguration("png-to-jpg");
-  const images = config.get<string>("images") || "sample_images";
-  const contents = config.get<string>("contents") || "sample_contents";
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+  let images = config.get<string>("images") || "${workspaceFolder}/";
+  let articles = config.get<string>("articles") || "${workspaceFolder}/articles";
+
+  // ${workspaceFolder}が含まれている場合は展開する
+  if (images.includes('${workspaceFolder}')) {
+    images = images.replace('${workspaceFolder}', workspaceFolder);
+  }
+  if (articles.includes('${workspaceFolder}')) {
+    articles = articles.replace('${workspaceFolder}', workspaceFolder);
+  }
 
   const disposable = vscode.commands.registerCommand(
     "png-to-jpg.convert",
     async () => {
       try {
         console.log("Command execution started");
-        vscode.window.showInformationMessage(`Converting PNG to JPG in configured directory: ${images}`);
+
+        // 画像変換
+        const convertPngToJpgMessage = `Converting PNG to JPG in ${images}`
+        console.log(convertPngToJpgMessage);
+        vscode.window.showInformationMessage(convertPngToJpgMessage);
         await convertPngToJpg(images);
         console.log("PNG to JPG conversion completed");
-        // 参照変換も実行
-        await replacePngReferencesToJpg(contents);
+
+        // 参照変換
+        const convertReferenceMessage = `Converting reference in ${articles}`
+        console.log(convertReferenceMessage);
+        vscode.window.showInformationMessage(convertReferenceMessage);
+        await replacePngReferencesToJpg(articles);
         console.log("Reference replacement completed");
-        vscode.window.showInformationMessage("Conversion completed!");
+
         console.log("Command execution finished successfully");
-      } catch (error) {
+        vscode.window.showInformationMessage("Conversion completed!");
+
+    } catch (error) {
         vscode.window.showErrorMessage(`Error during conversion: ${error instanceof Error ? error.message : String(error)}`);
         console.error("Error during conversion:", error);
       }

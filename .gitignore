@@ -3,5 +3,8 @@ dist
 node_modules
 .vscode-test/
 *.vsix
+src/**/*.js
+src/**/*.map
+
 .clinerules
 .history

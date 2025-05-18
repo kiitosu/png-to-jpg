@@ -12,3 +12,16 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+
+images
+articles
+
+!node_modules/sharp/**
+!node_modules/@img/sharp-*/**
+!node_modules/color/**
+!node_modules/color-convert/**
+!node_modules/color-name/**
+!node_modules/color-string/**
+!node_modules/detect-libc/**
+!node_modules/simple-swizzle/**
+!node_modules/semver/**
