@@ -8,7 +8,8 @@ import * as fsSync from "fs";
  * 指定ディレクトリ以下のPNGファイルを再帰的にJPEGに変換する関数
  * @param dir 変換対象のディレクトリパス
  */
-async function convertPngToJpg(dir: string) {
+async function convertPngToJpg(dir: string): Promise<string[]> {
+  const convertedPngFiles: string[] = [];
   /**
    * ディレクトリを再帰的に処理し、PNGファイルをJPEGに変換する内部関数
    * @param directory 処理対象のディレクトリパス
@@ -27,6 +28,13 @@ async function convertPngToJpg(dir: string) {
         try {
           await sharp(fullPath).jpeg({ quality: 30 }).toFile(jpgPath);
           console.log(`Converted: ${fullPath} -> ${jpgPath}`);
+          convertedPngFiles.push(fullPath);
+          try {
+            await fs.unlink(fullPath);
+            console.log(`Deleted original PNG: ${fullPath}`);
+          } catch (unlinkError) {
+            console.error(`Failed to delete original PNG ${fullPath}:`, unlinkError);
+          }
         } catch (error) {
           console.error(`Failed to convert ${fullPath}:`, error);
         }
@@ -34,13 +42,14 @@ async function convertPngToJpg(dir: string) {
     }
   }
   await processDirectory(dir);
+  return convertedPngFiles;
 }
 
 /**
  * 指定ディレクトリ以下のMarkdownファイル内のPNG参照をJPG参照に置換する関数
  * @param dir 置換対象のディレクトリパス
  */
-async function replacePngReferencesToJpg(dir: string) {
+async function replacePngReferencesToJpg(dir: string, convertedPngFiles: string[]) {
   async function processDirectory(directory: string) {
     const entries = await fs.readdir(directory, { withFileTypes: true });
     for (const entry of entries) {
@@ -53,8 +62,13 @@ async function replacePngReferencesToJpg(dir: string) {
       ) {
         try {
           let content = await fs.readFile(fullPath, "utf-8");
-          // PNG参照をJPG参照に置換
-          const replacedContent = content.replace(/\.png/g, ".jpg");
+          // 変換済みPNGファイルの参照だけをJPG参照に置換
+          let replacedContent = content;
+          for (const pngFile of convertedPngFiles) {
+            const pngFileName = path.basename(pngFile);
+            const regex = new RegExp(pngFileName.replace(/\./g, "\\."), "g");
+            replacedContent = replacedContent.replace(regex, pngFileName.replace(/\.png$/, ".jpg"));
+          }
           if (replacedContent !== content) {
             await fs.writeFile(fullPath, replacedContent, "utf-8");
             console.log(`Replaced references in: ${fullPath}`);
@@ -84,36 +98,36 @@ export function activate(context: vscode.ExtensionContext) {
     articles = articles.replace('${workspaceFolder}', workspaceFolder);
   }
 
-  const disposable = vscode.commands.registerCommand(
-    "png-to-jpg.convert",
-    async () => {
-      try {
-        console.log("Command execution started");
+    const disposable = vscode.commands.registerCommand(
+      "png-to-jpg.convert",
+      async () => {
+        try {
+          console.log("Command execution started");
 
-        // 画像変換
-        const convertPngToJpgMessage = `Converting PNG to JPG in ${images}`
-        console.log(convertPngToJpgMessage);
-        vscode.window.showInformationMessage(convertPngToJpgMessage);
-        await convertPngToJpg(images);
-        console.log("PNG to JPG conversion completed");
+          // 画像変換
+          const convertPngToJpgMessage = `Converting PNG to JPG in ${images}`
+          console.log(convertPngToJpgMessage);
+          vscode.window.showInformationMessage(convertPngToJpgMessage);
+          const convertedPngFiles = await convertPngToJpg(images);
+          console.log("PNG to JPG conversion completed");
 
-        // 参照変換
-        const convertReferenceMessage = `Converting reference in ${articles}`
-        console.log(convertReferenceMessage);
-        vscode.window.showInformationMessage(convertReferenceMessage);
-        await replacePngReferencesToJpg(articles);
-        console.log("Reference replacement completed");
+          // 参照変換
+          const convertReferenceMessage = `Converting reference in ${articles}`
+          console.log(convertReferenceMessage);
+          vscode.window.showInformationMessage(convertReferenceMessage);
+          await replacePngReferencesToJpg(articles, convertedPngFiles);
+          console.log("Reference replacement completed");
 
-        console.log("Command execution finished successfully");
-        vscode.window.showInformationMessage("Conversion completed!");
+          console.log("Command execution finished successfully");
+          vscode.window.showInformationMessage("Conversion completed!");
 
-    } catch (error) {
-        vscode.window.showErrorMessage(`Error during conversion: ${error instanceof Error ? error.message : String(error)}`);
-        console.error("Error during conversion:", error);
+      } catch (error) {
+          vscode.window.showErrorMessage(`Error during conversion: ${error instanceof Error ? error.message : String(error)}`);
+          console.error("Error during conversion:", error);
+        }
+        return;
       }
-      return;
-    }
-  );
+    );
 
   context.subscriptions.push(disposable);
 }
