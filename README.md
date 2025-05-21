@@ -21,6 +21,7 @@ pngファイルをjpgファイルに変換し、参照している箇所も`xxx.
 
 ## Release Notes
 
-### 0.0.3
+### Added
 
-Initial release
+- 0.0.4 Initial release
+- 0.0.5 GithubレポジトリのURLの不備を修正
