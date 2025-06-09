@@ -15,6 +15,9 @@ pngファイルをjpgファイルに変換し、参照している箇所も`xxx.
 * "png-to-jpg.images" : "画像が置かれているディレクトリ"
 * "png-to-jpg.contents" : "zenn等のコンテンツが置かれているディレクトリ"
 
+以下の設定は任意です。
+* "png-to-jpg.excludes" : "置換対象外としたいファイルに含む文字列"
+
 ## Known Issues
 
 特になし
@@ -25,3 +28,4 @@ pngファイルをjpgファイルに変換し、参照している箇所も`xxx.
 
 - 0.0.4 Initial release
 - 0.0.5 GithubレポジトリのURLの不備を修正
+- 0.0.8 ファイルの除外文字列設定を追加

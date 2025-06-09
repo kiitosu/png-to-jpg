@@ -8,7 +8,7 @@ import * as fsSync from "fs";
  * 指定ディレクトリ以下のPNGファイルを再帰的にJPEGに変換する関数
  * @param dir 変換対象のディレクトリパス
  */
-async function convertPngToJpg(dir: string): Promise<string[]> {
+async function convertPngToJpg(dir: string, excludes: string[]): Promise<string[]> {
   const convertedPngFiles: string[] = [];
   /**
    * ディレクトリを再帰的に処理し、PNGファイルをJPEGに変換する内部関数
@@ -22,7 +22,8 @@ async function convertPngToJpg(dir: string): Promise<string[]> {
         await processDirectory(fullPath);
       } else if (
         entry.isFile() &&
-        path.extname(entry.name).toLowerCase() === ".png"
+        path.extname(entry.name).toLowerCase() === ".png" &&
+        !excludes.some(ex => entry.name.includes(ex)) // excludesを一つも含まない場合
       ) {
         const jpgPath = fullPath.slice(0, -4) + ".jpg";
         try {
@@ -89,6 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
   let images = config.get<string>("images") || "${workspaceFolder}/";
   let articles = config.get<string>("articles") || "${workspaceFolder}/articles";
+  const excludes = config.get<string[]>('excludes') || [];
 
   // ${workspaceFolder}が含まれている場合は展開する
   if (images.includes('${workspaceFolder}')) {
@@ -123,7 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
         const convertPngToJpgMessage = `Converting PNG to JPG in ${images}`
         console.log(convertPngToJpgMessage);
         vscode.window.showInformationMessage(convertPngToJpgMessage);
-        const convertedPngFiles = await convertPngToJpg(images);
+        const convertedPngFiles = await convertPngToJpg(images, excludes);
         console.log("PNG to JPG conversion completed");
 
         // 参照変換
